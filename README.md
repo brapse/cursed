@@ -23,4 +23,8 @@ Routers distrobute jobs
 server: A running node proccess that accepts jobs, does work and forwards the result
 to a 
 
-reducer
+
+Success:
+========
+- Should be able to write a simple script that runs in parallel
+

@@ -1,12 +1,11 @@
 // Create  a process that sends jobs to a server and returns the result
 var sys = require('sys'),
-   http = require('http');
+   http = require('http'),
+    fs  = require('fs');
 
 var server = http.createClient(8124, 'localhost');
 
-var request = server.request('POST', '/', {'host': 'localhost'});
-
-request.write(JSON.stringify({'foo': "Bar"}));
+var request = server.request('POST', '/process', {'host': 'localhost'});
 
 request.addListener('response', function (response) {
       //sys.puts('STATUS: ' + response.statusCode);
@@ -32,4 +31,9 @@ request.addListener('response', function (response) {
     });
 });
 
-request.end();
+fs.readFile('dictionary.txt', 'utf8', function (err, data) {
+  if (err) throw err;
+  request.write(JSON.stringify({'data': data}));
+  request.end();
+});
+
