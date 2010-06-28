@@ -1,27 +1,49 @@
 var sys = require('sys'),
-   http = require('http');
+   http = require('http'),
+   fs = require('fs');
 
-/* Create a server that accepts an argument and performs a job based on those arguments
- */
+// Accept a list of words, returns a set of all the reductions of that word
+var words;
 
-// Setup Proccess
+var is_a_word = function(word) {
+    var found = words.filter(function(w) { return w == word });
+    return found.length == 1
+}
+                                                    
+// This is wrong, the reduction must come from each side
+var reduce = function(word){            
+    sys.puts("reducing: " + word);
+    // reductions is sequential substrings within word
+    var reductions = [word];
+    var front;
+    var back;
+       
+    for(var i=1; i < word.length ; i++){
+        front= word.substring(word.length, i);
+        if(is_a_word(front)){
+            reductions.push(front);
+        }
+        back = word.substring(0, i);
+        if(is_a_word(back)){
+            reductions.push(back);
+        }
+    }
 
+    return reductions.map(function(r){ return r.trim() });
+};
 
 // Request Processing
 var process = function(args){
-    // expects a hash with a sing key, data as one long string
-    var lines = args['data'].split('\n');
-    lines.forEach(function(el){
-        sys.puts(el);
-    });
-    sys.puts('processed: ' + lines.length);
+    // Return the reductions of all the words
+    var words = args['data'].split('\n');
+    return words.map(function(word) { return reduce(word)} );
 };
 
-// Setup Server
+// ######################################
 
-http.createServer(function (req, res) {
-    // Consume json arguments 
-    // Extract from req
+//var server = new(cursed.Worker)(
+
+var server = http.createServer(function (req, res) {
     req.setEncoding('utf8');
 
     var req_body = '';
@@ -31,22 +53,28 @@ http.createServer(function (req, res) {
     });
 
     req.addListener('end', function () {
+        sys.puts("Received");
+        var data = '';
         try {
-            sys.puts("Received");
-            var data = JSON.parse(req_body);
-            sys.puts(data);
-            process(data);
+            data = process(JSON.parse(req_body));
         } catch (e) {
-            sys.puts("json parsing error");
+            sys.puts("Processing failed");
             throw e;
         }
 
         // Respond
-        var response_body = JSON.stringify({'result': 'success'});
+        var response_body = JSON.stringify({'result': 'success', 'data': data });
 
         res.writeHead(200, {'Content-Type': 'application/json', 'Content-Length': response_body.length});
         res.end(response_body);
     });
-}).listen(8124, "127.0.0.1");
+});
 
-sys.puts('Server running at http://127.0.0.1:8124/');
+// Get everything started
+fs.readFile('words.txt', 'utf8', function(err, text) {
+    words = text.split('\n');
+    server.listen(8124, "127.0.0.1");
+    sys.puts('Server running at http://127.0.0.1:8124/');
+});
+
+

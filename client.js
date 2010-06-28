@@ -3,6 +3,8 @@ var sys = require('sys'),
    http = require('http'),
     fs  = require('fs');
 
+
+//This client needs to partition requests accross multiple running processes
 var server = http.createClient(8124, 'localhost');
 
 var request = server.request('POST', '/process', {'host': 'localhost'});
