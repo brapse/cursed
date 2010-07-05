@@ -7,7 +7,16 @@ var sys = require('sys'),
 require.paths.unshift(path.join(__dirname, 'lib'));
 var cursed = require('cursed')
 
-var worker = new(cursed.Worker)('127.0.0.1', 8102);
+var concurrency = process.argv[2];
+var workers = [];
+
+// TODO: think about process affinity
+var base_port = 8100;
+while(workers.length < concurrency){
+    workers.push(new(cursed.Worker)('127.0.0.1', base_port++));
+}
+
+sys.puts('Starting client with: ' + workers.length + ' workers');
 
 fs.readFile('dictionary.txt', 'utf8', function (err, data) {
     if (err) throw err;
@@ -15,9 +24,10 @@ fs.readFile('dictionary.txt', 'utf8', function (err, data) {
     
     var partitions = cursed.partition(data, 100);
 
+    var current = workers[0];
     partitions.forEach(function(words){
         //Dispatch to a worker
-        worker.run('process', {words: words}, function(err, results){
+        current.run('process', {words: words}, function(err, results){
             if(err){
                 sys.puts('failed: ' + err);
             } else {
@@ -25,6 +35,8 @@ fs.readFile('dictionary.txt', 'utf8', function (err, data) {
                 sys.puts(sys.inspect(results));
             }
         });
+        workers.push(current);
+        current = workers.shift();
     });
 });
 

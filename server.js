@@ -3,29 +3,33 @@ var sys = require('sys'),
    http = require('http'),
      fs = require('fs');
 
+var port = process.argv[2] || 8100;
+
+var puts = function(txt){
+    sys.puts('server: '+ port + ' -> ' + txt);
+}
+
 require.paths.unshift(path.join(__dirname, 'lib'));
 var cursed = require('cursed')
 
 // Request Processing
-var process = function(args){
+var compute = function(args){
     var is_a_word = function(word) {
         var found = words.filter(function(w) { return w.trim() == word.trim() });
         return found.length > 0
     }
     var reduce = function(word){            
-        sys.puts("reducing: " + word);
+        puts("reducing: " + word);
         var reductions = [word];
         var front;
         var back;
            
         for(var i=1; i < word.length ; i++){
             front= word.substring(word.length, i);
-            //sys.puts('  checking: ' + front);
             if(is_a_word(front)){
                 reductions.push(front);
             }
             back = word.substring(0, i);
-            //sys.puts('  back: ' + back);
             if(is_a_word(back)){
                 reductions.push(back);
             }
@@ -40,8 +44,11 @@ var process = function(args){
 
 // ######################################
 
-var server = new(cursed.Server)('127.0.0.1', 8102);
-server.map('/process', process);
+// Start several servers, and send them each work
+
+
+var server = new(cursed.Server)('127.0.0.1', port);
+server.map('/process', compute);
 
 // Get everything started
 var words;
