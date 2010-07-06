@@ -14,11 +14,34 @@ var cursed = require('cursed')
 
 // Request Processing
 var compute = function(args){
-    var is_a_word = function(word) {
-        var found = words.filter(function(w) { return w.trim() == word.trim() });
-        return found.length > 0
+    var binary_search = function(needle, haystack){
+        var start = 0,
+            end   = haystack.length - 1,
+            middle;
+
+        while(start < end){
+            middle = Math.floor((end - start) / 2) + start;
+            //sys.puts(start + ' ' + end + ' ' + middle);
+
+            if(haystack[middle] == needle)
+                return middle;
+
+            if(needle < haystack[middle])
+                end = middle -1;
+            else
+                start = middle +1;
+        }
+
+        return -1;
+        
     }
-    var reduce = function(word){            
+
+    var is_a_word = function(word){
+        var found = binary_search(word.trim(), words);
+        return found != -1;
+    }
+    
+    var reduce = function(word){
         puts("reducing: " + word);
         var reductions = [word];
         var front;
@@ -54,6 +77,7 @@ server.map('/process', compute);
 var words;
 fs.readFile('words.txt', 'utf8', function(err, text) {
     if(err) throw err;
-    words = text.split('\n');
+    words = text.split('\n').map(function(f){ return f.trim() });
+
     server.start();
 });

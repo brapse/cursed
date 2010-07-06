@@ -7,7 +7,7 @@ var sys = require('sys'),
 require.paths.unshift(path.join(__dirname, 'lib'));
 var cursed = require('cursed')
 
-var concurrency = process.argv[2];
+var concurrency = process.argv[2] || 1
 var workers = [];
 
 // TODO: think about process affinity
@@ -18,7 +18,7 @@ while(workers.length < concurrency){
 
 sys.puts('Starting client with: ' + workers.length + ' workers');
 
-fs.readFile('dictionary.txt', 'utf8', function (err, data) {
+fs.readFile('words.txt', 'utf8', function (err, data) {
     if (err) throw err;
     data = data.split('\n').map(function(l){return l.trim()});
     

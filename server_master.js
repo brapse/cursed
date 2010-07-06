@@ -1,4 +1,5 @@
 var child_process = require('child_process');
+var sys = require('sys');
 
 // TODO: child process killing / restarting
 var create_server = function(port){
