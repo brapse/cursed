@@ -24,13 +24,6 @@ server: A running node proccess that accepts jobs, does work and forwards the re
 to a 
 
 
-500 words: node client.js 4  0.15s user 0.02s system 0% cpu 35.158 total
-500 words (INDEXED) node client.js 4  0.13s user 0.02s system 6% cpu 2.287 total
-
-Whole dictionary (RAW): node client.js 4  9.12s user 0.69s system 0% cpu 44:12.29 total
-Success:
-Whole dictionary (INDEXED)node client.js 4  6.82s user 0.20s system 4% cpu 2:36.35 total
-While Dictionary (binary_search): node client.js 4  5.35s user 0.15s system 66% cpu 8.267 total
 
 ========
 
@@ -42,4 +35,12 @@ While Dictionary (binary_search): node client.js 4  5.35s user 0.15s system 66% 
     - Track failures
     - Stats 
     - Atomic tasks and retry-ability
+
+TODO (in order)
+==============
+- Create a seperate repo for examples
+- Abstract the moving parts of
+    - Task definition
+    - Partitioning
+    - Worker process spawning
 
