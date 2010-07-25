@@ -6,9 +6,21 @@ CURSED
 Cursed sets up a collection of node processes locally, or remotely, that share the load
 of some computational process. Inter process comunication via http.
 
+Instrument
+==========
+(not yet working)
+- npm install cursed
+- cursed myProject
+- edit server.js, should 
+- node server.js
+- cursed run.js "job name"
+
 
 Architecture:
 =============
+A cursed app contains:
+    - One or many of command descriptions, things that can be executed within the cluster
+    - One or many jobs that send data at commands
 
 Routers distrobute jobs
     Whats the anatomy of a job?
