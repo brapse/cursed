@@ -27,4 +27,3 @@ vows.describe('cursed.Server').addBatch({
         }
     }
 }).export(module);
-

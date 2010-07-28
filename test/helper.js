@@ -22,7 +22,7 @@ exports.make_request = function (host, port, url, args, callback) {
                     args = body;
                 }
                 callback(null, args);
-            }else{
+            } else {
                 var failure = new(Error)("response from server was " + response.statusCode);
                 callback(failure);
             }
