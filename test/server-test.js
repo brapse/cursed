@@ -19,10 +19,15 @@ vows.describe('cursed.Server').addBatch({
 
         'Requesting': {
             topic: function (server) {
-                helpers.make_request('127.0.0.1', 8001, '/status', {}, this.callback );
+                var mock_server = new(cursed.MockServer)(server);
+                mock_server.request('/status', {}, {}, this.callback);
             },
-            "should be ok": function(res) {
-                assert.typeOf(res, "string");
+            "should succeed": function(status, headers, body) {
+                assert.equal(status, 200);
+            },
+            "should return A OK": function(status, headers, body) {
+                //sys.puts(sys.inspect(arguments));
+                //assert.typeOf(body, "string");
             }
         }
     }
