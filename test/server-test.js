@@ -22,12 +22,16 @@ vows.describe('cursed.Server').addBatch({
                 var mock_server = new(cursed.MockServer)(server);
                 mock_server.request('/status', {}, {}, this.callback);
             },
-            "should succeed": function(status, headers, body) {
+            "should return correct status code": function (status) {
                 assert.equal(status, 200);
             },
-            "should return A OK": function(status, headers, body) {
-                //sys.puts(sys.inspect(arguments));
-                //assert.typeOf(body, "string");
+            "should set the correct headers": function (_, headers) {
+                assert.typeOf(headers, "object");
+                assert.equal(headers['Content-Type'], 'application/json');
+            },
+            "should return A OK": function (_, _, body) {
+                assert.typeOf(body, "string");
+                assert.equal(body, 'OK');
             }
         }
     }
