@@ -14,11 +14,14 @@ vows.describe('cursed.Connection').addBatch({
 
         'Requesting': {
             topic: function (connection) {
-                connection.send('status', {}, this.callback);
+                var mock_response = {statusCode: 200};
+                connection.handle(mock_response, '{"foo":"bar"}', this.callback );
             },
-            "should be ok": function(res) {
-                assert.typeOf(res, "string");
+
+            "should be ok": function (err, args) {
+                assert.isNull(err);
+                assert.isObject(args);
             }
         }
     }
-}).export(module);
+}).export(module, {error: false});
