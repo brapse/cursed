@@ -45,6 +45,24 @@ vows.describe('cursed.Router').addBatch({
                    assert.isTrue('reduce'   in this.router.routes);
                    assert.isTrue('finalize' in this.router.routes);
                }
+            },
+            'Route': {
+                topic: function() {
+                    var router = new(cursed.Router)('127.0.0.1', 8000);
+                    router.routes = { test: 
+                                        [{host: '127.0.0.1', port: 8001, weight: 1}]
+                                    }
+
+                    var mock_router = new(cursed.MockServer)(router);
+                    mock_router.request('route', {}, 'test', this.callback);
+                },
+               'Should provide the correct routing table': function(status, headers, route) {
+                   assert.equal(status, 200);
+
+                   assert.typeOf(route, 'object');
+                   assert.equal(route.host, '127.0.0.1');
+                   assert.equal(route.port, 8001);
+               },
             }
         }
 }).export(module, { error: false });
