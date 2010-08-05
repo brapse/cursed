@@ -56,13 +56,32 @@ vows.describe('cursed.Router').addBatch({
                     var mock_router = new(cursed.MockServer)(router);
                     mock_router.request('route', {}, 'test', this.callback);
                 },
-               'Should provide the correct routing table': function(status, headers, route) {
+               'Should provide the correct routing table': function(status, headers, body) {
                    assert.equal(status, 200);
+                   assert.typeOf(body, 'string');
+                   var route;
+                   assert.doesNotThrow(function() { route = JSON.parse(body) });
 
                    assert.typeOf(route, 'object');
                    assert.equal(route.host, '127.0.0.1');
                    assert.equal(route.port, 8001);
-               },
-            }
+               }
+            },
+
+           'Run': {
+               //topic: function() {
+                   //var router = new(cursed.Router)('127.0.0.1', 8000);
+                   //router.commands.test = function(args, headers, reply) { reply.emit('AWESOME') };
+                   //router.routes = { test: 
+                                        //[{host: '127.0.0.1', port: 8000, weight: 1}]
+                                    //}
+
+                   //var mock_router = new(cursed.MockServer)(router);
+                   //mock_router.request('run', {}, {command: 'test', args: 'foo'}, this.callback);
+               //},
+               //'Should run a command': function (status, headers, body) {
+                   //assert.equal(body, 'AWESOME');
+               //}
+           }
         }
 }).export(module, { error: false });
