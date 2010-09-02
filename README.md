@@ -6,8 +6,16 @@ CURSED
 Cursed sets up a collection of node processes locally, or remotely, that share the load
 of some computational process.
 
-Instrument
-==========
+Status
+======
+experimental but actively developed (September 2010) 
+- Does trivial things, inefficiently
+- some components are tested
+- api is unstable
+
+Use
+===
+Discription pending solid api.
 see github.com/brapse/cursed_examples
 
 Architecture:
