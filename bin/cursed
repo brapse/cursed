@@ -1,0 +1,131 @@
+#!/usr/bin/env node
+
+var sys = require('sys'),
+   path = require('path'),
+  spawn = require('child_process').spawn;
+
+require.paths.unshift(path.join(__dirname, '..', 'lib'));
+
+var cursed = require('cursed');
+
+// XXX: import from some other file
+var version = 0.1
+    
+var parse_args = function (args) {
+    var flag_regex = /-(\w)/;
+
+    var result = {};
+    result.flags = [];
+    var current;
+    while (current = args.shift()) {
+        if (current.match(flag_regex)) { 
+            if (args.length == 0 || args[0].match(flag_regex)) {
+                // it's a flag
+                result.flags.push(current.replace(/-/, ''));
+            } else {
+                // it's an optoin
+                result[current.replace(/-/, '')] = args.shift();
+            }
+        }
+    }
+
+    return result;
+}
+
+var general_help = [
+  'Cursed: distributed computation (v' + version + ')',
+  'usage: cursed [command] [options]\n',
+  'commands',
+  '     router:        Starts a router',
+  '       node:        Starts a node',
+  '        run:        Start a job',
+  '     status:        stat the cluster for whats going on'
+].join('\n');
+
+var help = {
+    router: 'start a the router\n\t options: -h host -p port',
+    node:   'start a node \n\toptions: -h host -p port -t task_module -w workers',
+    run:    'run a job\n\toptions: -h host -p port -j job_name',
+    status: 'get the status'
+}
+
+// ##################################
+
+var runners = {}
+
+runners.help = function (args) {
+    if(args.length < 1 || !help.hasOwnProperty(args[0])){ 
+        console.log(general_help);
+    }else {
+        console.log(help[args[0]]);
+    }
+}
+
+runners.router = function (args) {
+    var host = args['h'] || '127.0.0.1';
+    var port = args['p'] || 8000;
+
+    console.log('starting a router: ' + host + ':' + port);
+    new(cursed.Router)(host, port).start();
+}
+
+runners.node = function (args) {
+    var host  = args['h'] || '127.0.0.1',
+        port  = args['p'] || 8001,
+        tasks = args['t'] || 'tasks';
+  concurrency = args['w'] || 4
+
+    var router_host = '127.0.0.1',
+        router_port = 8000
+    
+    var task_module_location = root + '/' + tasks;
+
+    sys.puts('Starting node: ' + host + ':' + port);
+    var node   = new(cursed.Node)(concurrency, task_module_location, host, port);
+    var router = new(cursed.Connection)(router_host, router_port);
+
+    node.register(router, function (err, result) {
+        if (err) {
+            sys.puts("ERROR Starting Node: \n" + err);
+            process.exit(0);
+        }
+
+        console.log('Node started');
+    });
+}
+
+runners.run = function (args) {
+    var host     = args['h'] || '127.0.0.1';
+    var port     = args['p'] || 8000;
+    var job_name = args['j'];
+
+    var job_module = root + '/jobs';
+
+
+    if(job_name == undefined) {
+        console.log('Please specify a job name with -j jobname');
+        process.exit(0);
+    }
+
+    var router = new(cursed.Router.connection)(host, port);
+    console.log(job_module);
+    var job = require(job_module)[job_name];
+
+    job(router);
+}
+
+// ##################################
+
+var command = process.argv[2];
+var root;
+
+spawn('pwd').stdout.on('data', function(pwd_result) {
+    var args = parse_args(process.argv.slice(3));
+    root = args['r'] || pwd_result.toString().trim();
+
+    if(runners.hasOwnProperty(command)) {
+        runners[command](args);
+    } else {
+        console.log(general_help);
+    }
+});
