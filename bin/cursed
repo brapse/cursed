@@ -94,6 +94,17 @@ runners.node = function (args) {
     });
 }
 
+runners.worker = function(args) {
+    var host  = args['h'] || '127.0.0.1',
+        port  = args['p'] || 8001,
+        tasks = args['t'] || 'tasks';
+
+    var task_module_location = root + '/' + tasks;
+
+    sys.puts('Starting worker: ' + host + ':' + port);
+    new(cursed.Worker)(host, port, task_module_location).start();
+}
+
 runners.run = function (args) {
     var host     = args['h'] || '127.0.0.1';
     var port     = args['p'] || 8000;
