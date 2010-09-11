@@ -120,7 +120,8 @@ runners.run = function (args) {
     var port     = args['p'] || 8000;
     var job_name = args['j'];
 
-    var job_module = root + '/jobs';
+    var job_module_location = root + '/jobs';
+    var job_module = require(job_module_location);
 
 
     if(job_name == undefined) {
@@ -128,11 +129,20 @@ runners.run = function (args) {
         process.exit(0);
     }
 
-    var router = new(cursed.Router.connection)(host, port);
-    console.log(job_module);
-    var job = require(job_module)[job_name];
+    var job_function = job_module[job_name];
 
-    job(router);
+    if(typeof(job_function) != 'function'){
+        var msg = ['Job not found!',
+                   'job: ' + job_name,
+                   'job_module: ' + job_module_location,
+                   'available jobs: ' + Object.keys(job_module)].join('\n');
+
+        console.log(msg);
+        process.exit(0);
+    }
+
+    var router = new(cursed.Router.connection)(host, port);
+    job_function(router);
 }
 
 runners.status = function(args) {
