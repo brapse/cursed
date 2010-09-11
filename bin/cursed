@@ -2,6 +2,7 @@
 
 var sys = require('sys'),
    path = require('path'),
+    net = require('net'),
   spawn = require('child_process').spawn;
 
 require.paths.unshift(path.join(__dirname, '..', 'lib'));
@@ -77,6 +78,8 @@ runners.node = function (args) {
 
     var router_host = '127.0.0.1',
         router_port = 8000
+
+    // TODO: watch files for changes and restart the service
     
     var task_module_location = root + '/' + tasks;
 
@@ -84,10 +87,10 @@ runners.node = function (args) {
     var node   = new(cursed.Node)(concurrency, task_module_location, host, port);
     var router = new(cursed.Connection)(router_host, router_port);
 
-    node.register(router, function (err, result) {
+    node.start(router, function (err, result) {
         if (err) {
             sys.puts("ERROR Starting Node: \n" + err);
-            process.exit(0);
+            //process.exit(0);
         }
 
         console.log('Node started');
@@ -95,14 +98,21 @@ runners.node = function (args) {
 }
 
 runners.worker = function(args) {
-    var host  = args['h'] || '127.0.0.1',
-        port  = args['p'] || 8001,
-        tasks = args['t'] || 'tasks';
+    var tasks = args['t'] || 'tasks';
 
     var task_module_location = root + '/' + tasks;
 
-    sys.puts('Starting worker: ' + host + ':' + port);
-    new(cursed.Worker)(host, port, task_module_location).start();
+    console.log('Worker waiting on file descriptor...');
+    var stdin = new net.Stream(0, 'unix');
+    stdin.on('data', function(data) {
+            //whatever
+    });
+    stdin.on('fd', function(fd) {
+        console.log('File descripter received! starting worker: ' + process.pid);
+        new(cursed.Worker)(task_module_location).start(fd);
+    });
+
+    stdin.resume();
 }
 
 runners.run = function (args) {
@@ -123,6 +133,21 @@ runners.run = function (args) {
     var job = require(job_module)[job_name];
 
     job(router);
+}
+
+runners.status = function(args) {
+    var host = args['h'] || '127.0.0.1',
+        port = args['p'] || 8000;
+
+    var router = new(cursed.Router.connection)(host, port);
+
+    router.status(function(err, result) {
+        if(err) {
+            console.log('Cluster offline');
+        } else {
+            console.log(result);
+        }
+    });
 }
 
 // ##################################
