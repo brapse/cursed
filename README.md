@@ -8,10 +8,7 @@ of some computational process.
 
 Status
 ======
-experimental but actively developed (September 2010) 
-- Does trivial things, inefficiently
-- some components are tested
-- api is unstable
+ABANDONED
 
 Use
 ===
